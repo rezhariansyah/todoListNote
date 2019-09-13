@@ -1,192 +1,256 @@
-import React, {Component, Fragment} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  FlatList,
-} from 'react-native';
-import {Icon, Fab} from 'native-base';
-import {connect} from 'react-redux';
-import {getNote} from '../redux/Actions/note';
-import moment from 'moment';
+import React, { Component } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, StatusBar, ScrollView, FlatList, Modal, } from 'react-native';
+import { Fab, View, Text, Container, Header, Title, Thumbnail } from 'native-base';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-class Home extends Component {
+class HomeNote extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      noteList: [],
-    };
+      active: true,
+      modalVisible: false,
+      idData: 0,
+      dummyCategory: [
+        {
+          name: 'personal',
+          color: '#2577fa'
+        },
+        {
+          name: 'Work',
+          color: '#2FC2DF'
+        },
+        {
+          name: 'Wishlist',
+          color: '#ff05e2'
+        }
+      ],
+      dummyData: [
+        {
+          id: 1,
+          date: '27 June',
+          title: 'Lifecycle',
+          category: 'Work',
+          note: 'the stages in the lifespan of a commercial',
+          color: '#2FC2DF'
+        },
+        {
+          id: 2,
+          date: '28 June',
+          title: 'Work',
+          category: 'Wishlist',
+          note: 'Component Did Mount, Component Will Unmount',
+          color: '#ff05e2'
+        },
+        {
+          id: 3,
+          date: '28 June',
+          title: 'Wishlist',
+          category: 'Work',
+          note: 'Component Did Mount, Component Will Unmount',
+          color: '#ebdb34'
+        },
+        {
+          id: 4,
+          date: '28 June',
+          title: 'Lifecycle',
+          category: 'Work',
+          note: 'the process of bringing a new product to market',
+          color: '#2FC2DF'
+        },
+        {
+          id: 5,
+          date: '28 July',
+          title: 'Work',
+          category: 'Wishlist',
+          note: 'Component Did Mount, Component Will Unmount',
+          color: '#ff05e2'
+        },
+        {
+          id: 6,
+          date: '28 July',
+          title: 'Personal',
+          category: 'Personal',
+          note: 'Component Did Mount, Component Will Unmount',
+          color: '#2577fa'
+        },
+        {
+          id: 7,
+          date: '28 July',
+          title: 'Lifecycle',
+          category: 'Personal',
+          note: 'of an object in object-oriented programming',
+          color: '#2FC2DF'
+        }
+      ]
+    }
+  }
+  setModal(visible) {
+    this.setState({ modalVisible: visible });
   }
 
-  componentDidMount = async () => {
-    await this.props.dispatch(getNote()).then(res => {
-      this.setState({
-        noteList: this.props.noteList,
-      });
-    });
-  };
+  editNote = (item) => {
+    let index = this.state.dummyData.indexOf(this.state.dummyData.find(edit => edit.id === item.id))
+    this.state.dummyData[index] = item
+    this.setState({ dummyData: this.state.dummyData });
+  }
 
   render() {
-    console.log(this.state.noteList);
+    const { navigate, toggleDrawer } = this.props.navigation;
     return (
-      <Fragment>
-        <View style={styles.contentContainer}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={{justifyContent: 'center'}}
-              onPress={() => this.props.navigation.openDrawer()}>
-              <View style={styles.back}>
-                <Image
-                  style={styles.imageWidth}
-                  source={require('../assets/images/arkan.png')}
-                />
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.label}>
-              <Text style={{textAlign: 'center'}}>NOTE APP</Text>
-            </View>
-            <TouchableOpacity style={{justifyContent: 'center'}}>
-              <View style={styles.back}>
-                <Icon
-                  name="list"
-                  color="#000000"
-                  size={32}
-                  style={styles.menuIcon}
-                />
-              </View>
+      <Container>
+        <Header style={styles.header}>
+          <View>
+            <TouchableOpacity onPress={() => toggleDrawer()}>
+              <Thumbnail small source={{ uri: 'https://i0.wp.com/www.winhelponline.com/blog/wp-content/uploads/2017/12/user.png?fit=256%2C256&quality=100&ssl=1' }} />
             </TouchableOpacity>
           </View>
-          <View style={styles.searchBar}>
-            <TextInput
-              style={{marginHorizontal: 20}}
-              placeholder="Search Note..."
+          <View>
+            <Title style={{ color: 'black' }}>To do list</Title>
+          </View>
+          <View>
+            <TouchableOpacity onPress={() => { this.setModal(true) }}>
+              <Icon name='sort-amount-asc' size={22} />
+            </TouchableOpacity>
+          </View>
+        </Header>
+        <Modal transparent animationType="none" visible={this.state.modalVisible} onRequestClose={() => { }}>
+          <TouchableOpacity style={{ height: '50%' }} onPress={() => { this.setModal(!this.state.modalVisible); }} >
+            <View style={{ paddingRight: 31, paddingLeft: 187, paddingTop: 43, }}>
+              <View style={styles.modal}>
+                <TouchableOpacity onPress={() => { this.setModal(!this.state.modalVisible); }} >
+                  <Text style={{ fontSize: 15, padding: 10 }}>ASCENDING</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { this.setModal(!this.state.modalVisible); }} >
+                  <Text style={{ fontSize: 15, padding: 10 }}>DESCENDING</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        <ScrollView>
+          <View style={styles.noteList}>
+            <FlatList
+              onContentSizeChange
+              data={this.state.dummyData}
+              renderItem={({ item }) =>
+                <View style={{ marginRight: 30 }}>
+                  <TouchableOpacity style={{
+                    width: 138,
+                    height: 138,
+                    borderRadius: 7,
+                    backgroundColor: item.color,
+                    shadowColor: "#000",
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                    padding: 12,
+                    marginBottom: 30,
+                  }} onPress={() => { this.props.navigation.navigate('EditNote', {...item,editNote: this.editNote}) }}>
+                    <Text style={styles.noteDate}>{item.date}</Text>
+                    <Text numberOfLines={1} style={styles.noteTitle}>{item.title}</Text>
+                    <Text numberOfLines={1} style={styles.noteCategory}>{item.category}</Text>
+                    <Text numberOfLines={4} style={styles.noteContent}>{item.note}</Text>
+                  </TouchableOpacity>
+                </View>
+              }
+              numColumns={2}
             />
           </View>
-          <ScrollView>
-            <View style={styles.FlatList}>
-              <FlatList
-                data={this.state.noteList}
-                numColumns={2}
-                onEndReachedThreshold={0.2}
-                keyExtractor={item => item.id_note}
-                renderItem={({item, index}) => {
-                  return (
-                    <TouchableOpacity>
-                      <View
-                        style={{
-                          backgroundColor: `${item.color}`,
-                          margin: 15,
-                          borderRadius: 8,
-                          elevation: 6,
-                          width: 138,
-                          height: 136,
-                          padding: 5,
-                        }}
-                        key={index}>
-                        <Text style={{color: 'white', textAlign: 'right'}}>
-                          {moment(item.date, 'YYYY-MM-DD').format('DD-MM')}
-                        </Text>
-                        <Text style={{color: 'white', fontSize: 17}}>
-                          {item.name}
-                        </Text>
-                        <Text style={{color: 'white'}}>{item.category}</Text>
-                        <Text style={{color: 'white'}}>{item.desc}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </View>
-          </ScrollView>
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 30,
-              right: 30,
-              width: 100,
-              height: 100,
-              borderRadius: 50,
-            }}>
-            <Icon />
-          </View>
+        </ScrollView>
+        <View style={{ flex: 1 }}>
           <Fab
+            active={this.state.active}
+            containerStyle={{}}
+            style={{ backgroundColor: '#FFFCFC' }}
             position="bottomRight"
-            onPress={() => this.props.navigation.navigate('AddNote')}
-            style={{
-              backgroundColor: 'white',
-              marginBottom: 50,
-              position: 'absolute',
-            }}>
-            <Icon name="add" type="Ionicons" style={{color: 'black'}} />
+            onPress={() => navigate('AddNote')}>
+            <Icon name="plus" style={{ color: 'black' }} />
           </Fab>
         </View>
-      </Fragment>
+      </Container>
     );
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    noteList: state.note.noteList,
-  };
-};
-
-export default connect(mapStateToProps)(Home);
-
 const styles = StyleSheet.create({
-  contentContainer: {
-    backgroundColor: 'white',
-    flex: 1,
+  modal: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    borderRadius: 25,
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    backgroundColor: '#fff',
+    padding: 15,
   },
   header: {
-    flexDirection: 'row',
-    height: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: 'grey',
-  },
-  back: {
-    justifyContent: 'center',
-    marginHorizontal: 20,
-  },
-  imageWidth: {
-    width: 30,
-    height: 30,
-  },
-  label: {
-    justifyContent: 'center',
-    flex: 1,
-  },
-  containerFlatlist: {
-    marginHorizontal: 25,
-    marginVertical: 25,
-  },
-  searchBar: {
-    zIndex: 1,
     backgroundColor: '#fff',
-    borderBottomColor: 'transparent',
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 5,
     },
     shadowOpacity: 0.34,
     shadowRadius: 6.27,
-    elevation: 5,
-    marginTop: 15,
+
+    elevation: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  searchBar: {
+    zIndex: 1,
+    backgroundColor: '#fff',
+    paddingLeft: 15,
+    borderBottomColor: 'transparent',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+
+    elevation: 10,
+    marginTop: 85,
     alignSelf: 'center',
-    marginRight: 0,
-    height: 38,
+    height: 45,
     width: 307,
-    borderRadius: 20,
+    position: 'absolute',
+    borderRadius: 20
   },
-  FlatList: {
-    alignItems: 'center',
-    display: 'flex',
-    justifyContent: 'center',
+  noteList: {
+    marginHorizontal: 40,
+    justifyContent: 'space-between',
+    paddingTop: 40
   },
+  noteDate: {
+    color: '#fff',
+    textAlign: 'right',
+    fontSize: 12,
+    fontWeight: '800'
+  },
+  noteCategory: {
+    color: '#fff',
+    fontSize: 13
+  },
+  noteTitle: {
+    color: '#fff',
+    fontWeight: '900',
+    fontSize: 18
+  },
+  noteContent: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '500'
+  }
 });
+
+export default HomeNote;
